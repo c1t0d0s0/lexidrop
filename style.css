@@ -1,0 +1,678 @@
+/* LexiDrop Main Stylesheet - Pop & Bright Design */
+
+:root {
+  --bg-gradient: linear-gradient(180deg, #e0c3fc 0%, #8ec5fc 100%);
+  --game-bg: linear-gradient(180deg, #f0f8ff 0%, #e6f2ff 100%);
+  --font-family: 'Fredoka', 'Zen Maru Gothic', 'Quicksand', sans-serif;
+  
+  --primary-color: #ff6b6b;
+  --primary-hover: #ff5252;
+  --secondary-color: #4ecdc4;
+  --accent-yellow: #ffe66d;
+  --text-dark: #2d3436;
+  --text-light: #ffffff;
+  
+  /* 単語長別カラー */
+  --block-color-short: linear-gradient(135deg, #00b894, #55efc4);
+  --block-color-med: linear-gradient(135deg, #0984e3, #74b9ff);
+  --block-color-long: linear-gradient(135deg, #e17055, #ff7675);
+  --block-color-phrase: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  
+  --shadow-pop: 0 8px 0px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  --border-radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  color: var(--text-dark);
+}
+
+/* ゲーム全体ラッパー */
+.game-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 750px;
+  height: 94vh;
+  max-height: 850px;
+  background: #ffffff;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 6px solid #ffffff;
+}
+
+/* 背景クラウド装飾 */
+.bg-cloud {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50px;
+  z-index: 0;
+  pointer-events: none;
+  animation: floatCloud 20s infinite linear;
+}
+.cloud-1 { width: 120px; height: 40px; top: 10%; left: -100px; animation-duration: 25s; }
+.cloud-2 { width: 180px; height: 50px; top: 35%; left: -150px; animation-duration: 35s; animation-delay: 5s; }
+.cloud-3 { width: 100px; height: 35px; top: 70%; left: -80px; animation-duration: 30s; animation-delay: 12s; }
+
+@keyframes floatCloud {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(800px); }
+}
+
+/* ヘッダー情報バー */
+.game-header {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 1.8rem;
+  animation: bounceLogo 2s infinite ease-in-out;
+}
+
+@keyframes bounceLogo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px) rotate(5deg); }
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 3px 0 #e84393, 0 5px 10px rgba(0,0,0,0.15);
+  letter-spacing: 1px;
+}
+
+.stats-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-card {
+  background: #ffffff;
+  padding: 6px 12px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+  min-width: 68px;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #b2bec3;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.score-card .stat-value { color: #e84393; }
+.high-score-card .stat-value { color: #fdcb6e; }
+.level-card .stat-value { color: #0984e3; }
+.combo-card .stat-value { color: #ff7675; text-shadow: 0 0 5px rgba(255, 118, 117, 0.3); }
+
+.icon-btn {
+  background: #ffffff;
+  border: none;
+  font-size: 1.3rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, background-color 0.2s;
+}
+
+.icon-btn:hover {
+  transform: scale(1.08);
+  background: #fff0f5;
+}
+
+.icon-btn:active {
+  transform: scale(0.95) translateY(2px);
+  box-shadow: none;
+}
+
+/* メインゲーム領域 */
+.game-container {
+  position: relative;
+  flex: 1;
+  background: var(--game-bg);
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* 天井デンジャーライン */
+.danger-line {
+  position: absolute;
+  top: 75px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    #ff7675,
+    #ff7675 12px,
+    transparent 12px,
+    transparent 24px
+  );
+  z-index: 5;
+  box-shadow: 0 2px 10px rgba(255, 118, 117, 0.4);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* ピンチ時（デンジャー接近）の自動スローダウン演出 */
+.danger-line.pinch-active {
+  height: 6px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d63031,
+    #fdcb6e 12px,
+    #d63031 24px
+  );
+  box-shadow: 0 0 20px #d63031, 0 0 10px #fdcb6e;
+  animation: pinchLinePulse 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes pinchLinePulse {
+  0% { opacity: 0.8; transform: scaleY(1); }
+  100% { opacity: 1; transform: scaleY(1.4); }
+}
+
+.danger-badge {
+  position: absolute;
+  top: -12px;
+  right: 15px;
+  background: #d63031;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  animation: pulseDanger 1.5s infinite alternate;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.danger-badge.pinch-badge {
+  background: linear-gradient(135deg, #e17055, #d63031);
+  font-size: 0.78rem;
+  animation: pinchBadgePulse 0.4s infinite alternate;
+  box-shadow: 0 0 12px #d63031;
+}
+
+@keyframes pinchBadgePulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+@keyframes pulseDanger {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
+/* 積み上がったブロックの保持エリア */
+.stacked-blocks-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 落ちてくる単一アクティブブロック */
+.falling-block-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ブロック共通スタイル */
+.word-block {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-light);
+  box-shadow: 0 6px 0px rgba(0, 0, 0, 0.2), 0 8px 15px rgba(0, 0, 0, 0.15);
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  transition: transform 0.05s ease, background 0.3s;
+}
+
+.word-block::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  right: 8px;
+  height: 35%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 100%);
+  border-radius: 12px 12px 0 0;
+  pointer-events: none;
+}
+
+/* 単語の長さ別のグラデーションカラー */
+.block-short { background: var(--block-color-short); }
+.block-medium { background: var(--block-color-med); }
+.block-long { background: var(--block-color-long); }
+.block-phrase { background: var(--block-color-phrase); }
+
+/* 積み上がり済みブロック */
+.word-block.stacked {
+  opacity: 0.88;
+  box-shadow: 0 4px 0px rgba(0,0,0,0.2);
+  filter: saturate(0.85);
+}
+
+/* タイピング入力中の文字ハイライト */
+.char-typed {
+  color: #ffeaa7;
+  text-shadow: 0 0 8px #fdcb6e, 0 0 16px #ffeaa7, 0 2px 2px rgba(0,0,0,0.5);
+  font-weight: 900;
+}
+
+.char-untyped {
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.char-current {
+  text-decoration: underline wavy #ffeaa7 3px;
+  animation: pulseChar 0.8s infinite alternate;
+}
+
+@keyframes pulseChar {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+/* ミス時の赤色振動アニメーション */
+.word-block.shake-error {
+  animation: shakeError 0.35s cubic-bezier(.36,.07,.19,.97) both;
+  background: linear-gradient(135deg, #d63031, #ff7675) !important;
+  border-color: #ff7675 !important;
+}
+
+@keyframes shakeError {
+  10%, 90% { transform: translate3d(-4px, 0, 0); }
+  20%, 80% { transform: translate3d(6px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+  40%, 60% { transform: translate3d(8px, 0, 0); }
+}
+
+/* 消去時の爆発ポップポップアウト */
+.word-block.pop-clear {
+  animation: popClear 0.3s forwards ease-out;
+}
+
+@keyframes popClear {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3) rotate(5deg); opacity: 0.8; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* フッター入力ヒントバー */
+.game-footer {
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
+  padding: 12px 20px;
+  border-top: 4px solid #f1f2f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.typing-target-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 2px dashed #dfe6e9;
+  width: 100%;
+  justify-content: center;
+}
+
+.hint-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #a4b0be;
+}
+
+.target-word-preview {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.placeholder-text {
+  font-size: 0.9rem;
+  color: #b2bec3;
+  font-weight: 500;
+}
+
+/* モーダルオーバーレイ共通 */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(45, 52, 54, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 650px;
+  padding: 32px 28px;
+  border-radius: 28px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  position: relative;
+  border: 5px solid #ffeaa7;
+  animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.modal-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #fd79a8, #e84393);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.alert-badge {
+  background: linear-gradient(135deg, #d63031, #ff7675);
+}
+
+.pause-badge {
+  background: linear-gradient(135deg, #0984e3, #74b9ff);
+}
+
+.modal-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  color: #636e72;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.instruction-box {
+  background: #f8f9fa;
+  border-radius: 20px;
+  padding: 16px 20px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  border: 2px solid #edf2f7;
+}
+
+.inst-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.91rem;
+  color: #2d3436;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.inst-icon {
+  font-size: 1.2rem;
+}
+
+/* プライマリボタン */
+.primary-btn {
+  background: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+  color: #ffffff;
+  border: none;
+  font-family: var(--font-family);
+  font-size: 1.3rem;
+  font-weight: 700;
+  padding: 14px 35px;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 0 #b22222, 0 10px 20px rgba(214, 48, 49, 0.4);
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 0 #b22222, 0 12px 25px rgba(214, 48, 49, 0.5);
+}
+
+.primary-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 #b22222, 0 5px 10px rgba(214, 48, 49, 0.3);
+}
+
+.pulse-btn {
+  animation: btnPulse 2s infinite;
+}
+
+@keyframes btnPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* ゲームオーバー結果スコア */
+.result-stats {
+  background: #f8f9fa;
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.05rem;
+  color: #636e72;
+}
+
+.result-row strong {
+  font-size: 1.4rem;
+  color: #e84393;
+}
+
+/* スコア浮遊演出エフェクト */
+.score-float {
+  position: absolute;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #fdcb6e;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  pointer-events: none;
+  animation: floatUp 0.8s forwards ease-out;
+  z-index: 20;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-40px) scale(1.3); opacity: 0; }
+}
+
+/* 爆破ボーナスエフェクト */
+.word-block.bomb-explode {
+  animation: bombExplode 0.45s forwards ease-out !important;
+  background: linear-gradient(135deg, #ff7675, #d63031, #fdcb6e) !important;
+  border-color: #ffeaa7 !important;
+  box-shadow: 0 0 30px #d63031, 0 0 50px #fdcb6e !important;
+}
+
+@keyframes bombExplode {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  30% { transform: scale(1.4) rotate(-10deg); opacity: 0.9; }
+  60% { transform: scale(1.6) rotate(10deg); filter: brightness(2); }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+.score-float.bomb-bonus {
+  color: #ff7675;
+  font-size: 1.8rem;
+  text-shadow: 0 0 10px #d63031, 0 0 20px #fdcb6e;
+}
+
+/* 日本語訳表示エフェクト (はみ出し防止・高コントラスト表示) */
+.word-block.show-translation {
+  background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%) !important;
+  color: #ffeaa7 !important;
+  border: 3px solid #fdcb6e !important;
+  box-shadow: 0 0 25px #fdcb6e, 0 8px 25px rgba(0,0,0,0.6) !important;
+  transform: scale(1.08) !important;
+  transform-origin: center center;
+  z-index: 100 !important;
+  max-width: calc(100% - 30px) !important;
+  box-sizing: border-box !important;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), left 0.15s ease-out;
+}
+
+.ja-translation-text {
+  font-family: 'Zen Maru Gothic', 'Fredoka', sans-serif;
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  font-weight: 900;
+  color: #ffeaa7;
+  text-shadow: 0 0 10px #fdcb6e, 0 2px 4px rgba(0,0,0,0.9);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  animation: jaPopBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes jaPopBounce {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 日本語訳浮遊カードバッジ */
+.ja-float-badge {
+  position: absolute;
+  background: linear-gradient(135deg, #2d3436, #1e272e);
+  color: #ffeaa7;
+  border: 3px solid #fdcb6e;
+  border-radius: 25px;
+  padding: 10px 24px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px #fdcb6e;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 25px rgba(253, 203, 110, 0.8);
+  z-index: 200;
+  pointer-events: none;
+  animation: jaFloatCard 1.1s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  white-space: nowrap;
+}
+
+@keyframes jaFloatCard {
+  0% { transform: translate(-50%, 0) scale(0.4); opacity: 0; }
+  25% { transform: translate(-50%, -20px) scale(1.15); opacity: 1; }
+  75% { transform: translate(-50%, -30px) scale(1.05); opacity: 1; }
+  100% { transform: translate(-50%, -50px) scale(0.85); opacity: 0; }
+}
+
+/* レスポンシブ対応 */
+@media (max-height: 700px) {
+  .game-wrapper {
+    height: 98vh;
+    border-radius: 16px;
+  }
+  .modal-card {
+    padding: 20px 18px;
+  }
+  .instruction-box {
+    margin-bottom: 15px;
+    padding: 10px;
+  }
+}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LexiDrop - 英単語タイピングゲーム</title>
+  <meta name="description" content="ポップで明るい英単語ブロック落下タイピングゲーム。落ちてくる英単語をタイピングして消そう！">
+  <!-- Google Fonts: Fredoka & Quicksand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@500;700&family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="game-wrapper">
+    <!-- 背景の装飾クラウド -->
+    <div class="bg-cloud cloud-1"></div>
+    <div class="bg-cloud cloud-2"></div>
+    <div class="bg-cloud cloud-3"></div>
+
+    <!-- ヘッダー情報バー -->
+    <header class="game-header">
+      <div class="brand">
+        <span class="logo-icon">🧩</span>
+        <h1 class="logo-text">LexiDrop</h1>
+      </div>
+
+      <div class="stats-group">
+        <div class="stat-card score-card">
+          <span class="stat-label">SCORE</span>
+          <span class="stat-value" id="score-display">0</span>
+        </div>
+
+        <div class="stat-card high-score-card">
+          <span class="stat-label">BEST</span>
+          <span class="stat-value" id="highscore-display">0</span>
+        </div>
+
+        <div class="stat-card level-card">
+          <span class="stat-label">SPEED</span>
+          <span class="stat-value" id="speed-display">Lv.1</span>
+        </div>
+
+        <div class="stat-card combo-card">
+          <span class="stat-label">COMBO</span>
+          <span class="stat-value" id="combo-display">0</span>
+        </div>
+
+        <button id="pause-toggle-btn" class="icon-btn" title="一時停止 (Esc)" aria-label="一時停止">
+          <span id="pause-icon">⏸️</span>
+        </button>
+        <button id="sound-toggle-btn" class="icon-btn" title="効果音 ON/OFF" aria-label="効果音切り替え">
+          <span id="sound-icon">🔊</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- メインゲームエリア -->
+    <main class="game-container" id="game-container">
+      <!-- 天井デンジャーライン -->
+      <div class="danger-line" id="danger-line">
+        <span class="danger-badge" id="danger-badge">⚠️ DANGER ⚠️</span>
+      </div>
+
+      <!-- 積み上がったブロックの保持エリア -->
+      <div class="stacked-blocks-container" id="stacked-container"></div>
+
+      <!-- 落ちてくる単体アクティブブロック -->
+      <div class="falling-block-container" id="falling-container"></div>
+    </main>
+
+    <!-- フッター・キーボード入力ヒントバー -->
+    <footer class="game-footer">
+      <div class="typing-target-bar">
+        <span class="hint-label">Target:</span>
+        <div class="target-word-preview" id="target-word-preview">
+          <span class="placeholder-text">キーボードで英単語を入力してください</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- スタート画面モーダル -->
+  <div class="modal-overlay" id="start-modal">
+    <div class="modal-card start-card">
+      <div class="modal-badge">Typing Challenge</div>
+      <h2 class="modal-title">LexiDrop 🧩</h2>
+      <p class="modal-desc">落下する英単語を正確にタイピングして消去しましょう。<br>ブロックが上部のデンジャーラインに達するとゲームオーバーです。</p>
+      
+      <div class="instruction-box">
+        <div class="inst-item">
+          <span class="inst-icon">⌨️</span>
+          <span>英単語をタイピングして消去。リアルタイム打鍵音付き</span>
+        </div>
+        <div class="inst-item">
+          <span class="inst-icon">⚡</span>
+          <span>デンジャーライン接近時は速度が自動で50%低下（ピンチ保護）</span>
+        </div>
+        <div class="inst-item">
+          <span class="inst-icon">💣</span>
+          <span>ノーミス3コンボ達成で最上部のスタックブロックを爆破除去</span>
+        </div>
+        <div class="inst-item">
+          <span class="inst-icon">❌</span>
+          <span>タイプミス時は警告音が鳴り、単語の最初から再入力</span>
+        </div>
+      </div>
+
+      <button id="start-btn" class="primary-btn pulse-btn">ゲームスタート</button>
+    </div>
+  </div>
+
+  <!-- ゲームオーバー画面モーダル -->
+  <div class="modal-overlay hidden" id="gameover-modal">
+    <div class="modal-card gameover-card">
+      <div class="modal-badge alert-badge">GAME OVER</div>
+      <h2 class="modal-title">ゲームオーバー</h2>
+      <p class="modal-desc">ブロックが制限ラインに到達しました。</p>
+      
+      <div class="result-stats">
+        <div class="result-row">
+          <span>スコア</span>
+          <strong id="final-score">0</strong>
+        </div>
+        <div class="result-row">
+          <span>ハイスコア</span>
+          <strong id="final-highscore">0</strong>
+        </div>
+        <div class="result-row">
+          <span>消去したブロック</span>
+          <strong id="final-cleared-count">0</strong>
+        </div>
+      </div>
+
+      <button id="restart-btn" class="primary-btn">もう一度プレイする</button>
+    </div>
+  </div>
+
+  <!-- 一時停止モーダル -->
+  <div class="modal-overlay hidden" id="pause-modal">
+    <div class="modal-card pause-card">
+      <div class="modal-badge pause-badge">PAUSED</div>
+      <h2 class="modal-title">一時停止中 ⏸️</h2>
+      <p class="modal-desc">ゲームを一時停止しています。<br>準備ができたら「ゲームを再開する」を押すか、Escキーを押してください。</p>
+      
+      <button id="resume-btn" class="primary-btn pulse-btn">ゲームを再開する</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
