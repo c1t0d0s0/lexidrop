@@ -1,8 +1,8 @@
-# Lexidrop (レキシドロップ) 🧩✨
+# LexiDrop (レキシドロップ) 🧩✨
 
 > **落下する英単語ブロックをタイピングして消去！ネイティブ英語発音と日本語訳で楽しく学べる新感覚英単語タイピングゲーム**
 
-![Lexidrop Banner](https://img.shields.io/badge/Lexidrop-English%20Typing%20Game-ff7675?style=for-the-badge)
+![LexiDrop Banner](https://img.shields.io/badge/Lexidrop-English%20Typing%20Game-ff7675?style=for-the-badge)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
@@ -11,7 +11,7 @@
 
 ## 🌟 概要
 
-`Lexidrop`（レキシドロップ）は、ポップで洗練されたデザインと本格的なWeb音響・音声機能を備えた、ブラウザで遊べる英単語タイピングゲームです。
+`LexiDrop`（レキシドロップ）は、ポップで洗練されたデザインと本格的なWeb音響・音声機能を備えた、ブラウザで遊べる英単語タイピングゲームです。
 
 上部から少しずつ落ちてくる英単語ブロックをキーボードで正確にタイピングして消去していきます。単語を消去した瞬間、**本場アメリカ英語（en-US）のネイティブ音声で読み上げ**が行われるとともに、**対応する日本語訳がポップアップ表示**されるため、タイピングの爽快感と英語学習効果を同時に体験できます。
 
