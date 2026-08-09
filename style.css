@@ -629,6 +629,50 @@ body {
   animation: jaPopBounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+/* 日本語訳表示後のド派手爆発エフェクト */
+.word-block.pop-explode {
+  animation: blockPopExplode 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  background: linear-gradient(135deg, #ff7675 0%, #d63031 50%, #fdcb6e 100%) !important;
+  border-color: #ffeaa7 !important;
+}
+
+@keyframes blockPopExplode {
+  0% { transform: scale(1.08) rotate(0deg); filter: brightness(1.2); opacity: 1; }
+  25% { transform: scale(1.65) rotate(-6deg); filter: brightness(3); box-shadow: 0 0 60px #ffeaa7, 0 0 90px #ff7675, 0 0 120px #fdcb6e; }
+  50% { transform: scale(1.5) rotate(6deg); filter: brightness(4); }
+  100% { transform: scale(0) rotate(45deg); filter: brightness(5); opacity: 0; }
+}
+
+/* 派手な爆発衝撃波リング */
+.explosion-shockwave {
+  position: absolute;
+  pointer-events: none;
+  z-index: 145;
+  border-radius: 50%;
+  border: 4px solid #ffeaa7;
+  box-shadow: 0 0 30px #ffeaa7, 0 0 60px #ff7675, inset 0 0 20px #fdcb6e;
+  animation: shockwaveExpand 0.45s ease-out forwards;
+}
+
+@keyframes shockwaveExpand {
+  0% { width: 10px; height: 10px; opacity: 1; border-width: 8px; }
+  100% { width: 240px; height: 240px; opacity: 0; border-width: 1px; }
+}
+
+/* ド派手爆発キラキラ粒パーティクル */
+.explode-particle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 150;
+  animation: particleBurst 0.52s ease-out forwards;
+}
+
+@keyframes particleBurst {
+  0% { transform: translate(0, 0) scale(1.2) rotate(0deg); opacity: 1; }
+  50% { filter: brightness(2); }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.1) rotate(var(--rot)); opacity: 0; }
+}
+
 @keyframes jaPopBounce {
   0% { transform: scale(0.3); opacity: 0; }
   60% { transform: scale(1.2); opacity: 1; }

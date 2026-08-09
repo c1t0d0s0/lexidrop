@@ -277,6 +277,122 @@ if ('speechSynthesis' in window) {
   };
 }
 
+// 6. リアル重低音・本格リアル爆発効果音（正解消去時）
+function playPopExplodeSound() {
+  if (!gameState.soundEnabled || !audioCtx) return;
+  
+  const now = audioCtx.currentTime;
+
+  // Layer 1: ローパスフィルタ動的制御ホワイトノイズ（リアルな風圧・空気爆風テクスチャ）
+  const bufferSize = Math.floor(audioCtx.sampleRate * 0.45);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+
+  const noiseSource = audioCtx.createBufferSource();
+  noiseSource.buffer = buffer;
+
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(480, now);
+  filter.frequency.exponentialRampToValueAtTime(32, now + 0.45);
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.85, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+  noiseSource.connect(filter);
+  filter.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+
+  noiseSource.start(now);
+
+  // Layer 2: お腹・耳奥にズドンと響く超低音サブベース（地鳴りサイン波）
+  const subOsc = audioCtx.createOscillator();
+  const subGain = audioCtx.createGain();
+  
+  subOsc.type = 'sine';
+  subOsc.frequency.setValueAtTime(75, now);
+  subOsc.frequency.exponentialRampToValueAtTime(14, now + 0.5);
+  
+  subGain.gain.setValueAtTime(0.9, now);
+  subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+  
+  subOsc.connect(subGain);
+  subGain.connect(audioCtx.destination);
+  
+  subOsc.start(now);
+  subOsc.stop(now + 0.5);
+
+  // Layer 3: 初期アタック衝撃波（ドスン！）
+  const attackOsc = audioCtx.createOscillator();
+  const attackGain = audioCtx.createGain();
+
+  attackOsc.type = 'triangle';
+  attackOsc.frequency.setValueAtTime(140, now);
+  attackOsc.frequency.exponentialRampToValueAtTime(25, now + 0.25);
+
+  attackGain.gain.setValueAtTime(0.7, now);
+  attackGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+  attackOsc.connect(attackGain);
+  attackGain.connect(audioCtx.destination);
+
+  attackOsc.start(now);
+  attackOsc.stop(now + 0.25);
+}
+
+// 7. 正解消去時のド派手な粒子＆衝撃波爆発エフェクト
+function createExplosionParticles(centerX, centerY) {
+  // 1. 衝撃波リングのエフェクト
+  const shockwave = document.createElement('div');
+  shockwave.className = 'explosion-shockwave';
+  shockwave.style.left = `${centerX}px`;
+  shockwave.style.top = `${centerY}px`;
+  shockwave.style.transform = 'translate(-50%, -50%)';
+  gameContainer.appendChild(shockwave);
+  setTimeout(() => {
+    if (shockwave.parentNode) shockwave.parentNode.removeChild(shockwave);
+  }, 450);
+
+  // 2. 28個のド派手な多色キラキラ粒子（円形＆ダイヤ星形）
+  const colors = ['#ffeaa7', '#fdcb6e', '#ff7675', '#ff9ff3', '#74b9ff', '#55efc4', '#a29bfe', '#fab1a0', '#ffffff'];
+  const particleCount = 28;
+
+  for (let i = 0; i < particleCount; i++) {
+    const p = document.createElement('div');
+    p.className = 'explode-particle';
+
+    const isStar = Math.random() > 0.5;
+    const size = Math.floor(Math.random() * 10) + 8; // 8px ~ 18px
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const angle = (Math.PI * 2 / particleCount) * i + (Math.random() * 0.5 - 0.25);
+    const distance = Math.floor(Math.random() * 70) + 60; // 60px ~ 130px
+    const rot = Math.floor(Math.random() * 360) + 'deg';
+
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance;
+
+    p.style.width = `${size}px`;
+    p.style.height = `${size}px`;
+    p.style.background = color;
+    p.style.borderRadius = isStar ? '2px' : '50%';
+    p.style.boxShadow = `0 0 12px ${color}, 0 0 20px ${color}`;
+    p.style.left = `${centerX - size / 2}px`;
+    p.style.top = `${centerY - size / 2}px`;
+    p.style.setProperty('--dx', `${dx}px`);
+    p.style.setProperty('--dy', `${dy}px`);
+    p.style.setProperty('--rot', rot);
+
+    gameContainer.appendChild(p);
+    setTimeout(() => {
+      if (p.parentNode) p.parentNode.removeChild(p);
+    }, 520);
+  }
+}
+
 // --- ハイスコアのロード＆セーブ ---
 function loadHighScore() {
   const saved = localStorage.getItem('lexidrop_highscore');
@@ -716,18 +832,22 @@ function destroyCurrentBlock() {
   // キー入力を受け付けないように一旦クリア
   gameState.currentBlock = null;
 
-  // 日本語訳をしっかり読めるよう 1100ms (1.1秒) 待ってから消去エフェクト＆次ブロック生成
+  // 1. 日本語訳をしっかり確認（650ms）
   setTimeout(() => {
-    block.element.classList.add('pop-clear');
+    // 2. 爽快なポップ爆発音 ＆ キラキラ粒子爆発 ＆ 爆発アニメーション発動！
+    playPopExplodeSound();
+    createExplosionParticles(safeLeft + newWidth / 2, block.y + block.height / 2);
+    block.element.classList.add('pop-explode');
+
     setTimeout(() => {
       if (block.element.parentNode) {
         block.element.parentNode.removeChild(block.element);
       }
-    }, 300);
 
-    // 次のブロック生成
-    spawnFallingBlock();
-  }, 1100);
+      // 3. 次のブロック生成
+      spawnFallingBlock();
+    }, 380);
+  }, 650);
 }
 
 // --- 一番上に積まれているブロックの爆破ボーナス ---
