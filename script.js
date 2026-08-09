@@ -451,17 +451,27 @@ function checkPinchMode() {
     speedMultiplier = 0.50;
     dangerBadge.textContent = '⚡ PINCH SLOW (3 MISS)! ⚡';
   } else if (gameState.pinchRecoveryStep === 2) {
-    // 正解1回目: 67% スピードへ段階復帰
+    // 正解1回目: 60% スピードへ超緩やか復帰
     inPinchUI = true;
-    speedMultiplier = 0.67;
-    dangerBadge.textContent = '⚡ SPEED RECOVERING (1/3) ⚡';
+    speedMultiplier = 0.60;
+    dangerBadge.textContent = '⚡ RECOVERING (1/5)... ⚡';
   } else if (gameState.pinchRecoveryStep === 3) {
-    // 正解2回目: 84% スピードへ段階復帰
+    // 正解2回目: 70% スピードへ超緩やか復帰
     inPinchUI = true;
-    speedMultiplier = 0.84;
-    dangerBadge.textContent = '⚡ SPEED RECOVERING (2/3) ⚡';
+    speedMultiplier = 0.70;
+    dangerBadge.textContent = '⚡ RECOVERING (2/5)... ⚡';
+  } else if (gameState.pinchRecoveryStep === 4) {
+    // 正解3回目: 80% スピードへ超緩やか復帰
+    inPinchUI = true;
+    speedMultiplier = 0.80;
+    dangerBadge.textContent = '⚡ RECOVERING (3/5)... ⚡';
+  } else if (gameState.pinchRecoveryStep === 5) {
+    // 正解4回目: 90% スピードへ超緩やか復帰
+    inPinchUI = true;
+    speedMultiplier = 0.90;
+    dangerBadge.textContent = '⚡ RECOVERING (4/5)... ⚡';
   } else {
-    // 正解3回達成: 100% 通常スピード完全復帰
+    // 正解5回達成: 100% 通常スピード完全復帰
     inPinchUI = false;
     speedMultiplier = 1.0;
     dangerBadge.textContent = '⚠️ DANGER ⚠️';
@@ -654,14 +664,12 @@ function destroyCurrentBlock() {
   // 単語消去成功に伴い連続ミス（未消去着地）カウントをリセット
   gameState.consecutiveMisses = 0;
 
-  // ピンチ復帰中であれば、正解するごとに段階的にスピード復帰ステップを進める (1 -> 2 -> 3 -> 0[完全復帰])
+  // ピンチ復帰中であれば、正解するごとに超緩やかにスピード復帰ステップを進める (+10%ずつ/5回正解で完全復帰)
   if (gameState.pinchRecoveryStep > 0) {
-    if (gameState.pinchRecoveryStep === 1) {
-      gameState.pinchRecoveryStep = 2; // 1回成功: 50% -> 67%
-    } else if (gameState.pinchRecoveryStep === 2) {
-      gameState.pinchRecoveryStep = 3; // 2回成功: 67% -> 84%
-    } else if (gameState.pinchRecoveryStep === 3) {
-      gameState.pinchRecoveryStep = 0; // 3回成功: 84% -> 100% 完全復帰！
+    if (gameState.pinchRecoveryStep < 5) {
+      gameState.pinchRecoveryStep++; // 1(50%) -> 2(60%) -> 3(70%) -> 4(80%) -> 5(90%)
+    } else {
+      gameState.pinchRecoveryStep = 0; // 5回正解で 100% 完全復帰！
     }
   }
 
