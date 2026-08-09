@@ -99,6 +99,8 @@ let gameState = {
   clearedCount: 0,
   comboCount: 0,
   consecutiveMisses: 0, // 連続ミス（未消去着地）カウント
+  pinchRecoveryStep: 0, // ピンチ後の段階的スピード復帰ステップ (0:通常, 1:50%, 2:67%, 3:84%)
+  currentSpeedMultiplier: 1.0, // 現在の速度倍率
   hasMistypedCurrentBlock: false,
   speedLevel: 1,
   fallSpeed: 0.85, // ピクセル/フレーム (極めて緩やかに上昇)
@@ -422,38 +424,58 @@ function updateFooterPreview() {
   targetWordPreview.innerHTML = html;
 }
 
-// --- ピンチ時（デンジャー線接近 / 3連続失敗）判定 & 自動スローダウン ---
+// --- ピンチ時（デンジャー線接近 / 3連続失敗）判定 & 段階的スピード復帰処理 ---
 function checkPinchMode() {
   const dangerY = dangerLine.offsetTop + dangerLine.offsetHeight;
-  let inPinch = false;
+  let isHeightPinch = false;
 
   // 1. 積み上がりブロックのいずれかが危険線から140px以内に接近したらピンチ
   for (const stacked of gameState.stackedBlocks) {
     if (stacked.y <= dangerY + 140) {
-      inPinch = true;
+      isHeightPinch = true;
       break;
     }
   }
 
-  // 2. 単語消去に失敗して3連続でブロックが着地・スタックした場合もピンチ発動！
-  if (gameState.consecutiveMisses >= 3) {
-    inPinch = true;
+  let speedMultiplier = 1.0;
+  let inPinchUI = false;
+
+  if (isHeightPinch) {
+    // 高さ危険ピンチ: 最短高さ解消まで50%固定スローダウン
+    inPinchUI = true;
+    speedMultiplier = 0.5;
+    dangerBadge.textContent = '⚡ PINCH SLOW! ⚡';
+  } else if (gameState.pinchRecoveryStep === 1) {
+    // 3連続ミス発動直後: 50% スローダウン
+    inPinchUI = true;
+    speedMultiplier = 0.50;
+    dangerBadge.textContent = '⚡ PINCH SLOW (3 MISS)! ⚡';
+  } else if (gameState.pinchRecoveryStep === 2) {
+    // 正解1回目: 67% スピードへ段階復帰
+    inPinchUI = true;
+    speedMultiplier = 0.67;
+    dangerBadge.textContent = '⚡ SPEED RECOVERING (1/3) ⚡';
+  } else if (gameState.pinchRecoveryStep === 3) {
+    // 正解2回目: 84% スピードへ段階復帰
+    inPinchUI = true;
+    speedMultiplier = 0.84;
+    dangerBadge.textContent = '⚡ SPEED RECOVERING (2/3) ⚡';
+  } else {
+    // 正解3回達成: 100% 通常スピード完全復帰
+    inPinchUI = false;
+    speedMultiplier = 1.0;
+    dangerBadge.textContent = '⚠️ DANGER ⚠️';
   }
 
-  gameState.isPinch = inPinch;
+  gameState.isPinch = inPinchUI;
+  gameState.currentSpeedMultiplier = speedMultiplier;
 
-  if (inPinch) {
+  if (inPinchUI) {
     dangerLine.classList.add('pinch-active');
     dangerBadge.classList.add('pinch-badge');
-    if (gameState.consecutiveMisses >= 3) {
-      dangerBadge.textContent = '⚡ PINCH SLOW (3 MISS)! ⚡';
-    } else {
-      dangerBadge.textContent = '⚡ PINCH SLOW! ⚡';
-    }
   } else {
     dangerLine.classList.remove('pinch-active');
     dangerBadge.classList.remove('pinch-badge');
-    dangerBadge.textContent = '⚠️ DANGER ⚠️';
   }
 }
 
@@ -461,9 +483,9 @@ function checkPinchMode() {
 function gameLoop() {
   if (!gameState.isRunning || gameState.isPaused) return;
 
-  // ピンチ時の自動スローダウン判定
+  // ピンチ時・復帰段階に応じたスピード判定
   checkPinchMode();
-  const currentSpeed = gameState.isPinch ? gameState.fallSpeed * 0.5 : gameState.fallSpeed;
+  const currentSpeed = gameState.fallSpeed * gameState.currentSpeedMultiplier;
 
   // 1. アクティブ落下ブロックの更新
   if (gameState.currentBlock) {
@@ -520,6 +542,11 @@ function gameLoop() {
 function freezeBlockToStack(block) {
   // タイピング失敗（未消去のまま着地）カウントをインクリメント
   gameState.consecutiveMisses++;
+
+  // 3連続ミスに達した場合、50%スローダウン (Pinch Recovery Step 1) を起動
+  if (gameState.consecutiveMisses >= 3) {
+    gameState.pinchRecoveryStep = 1;
+  }
 
   block.element.classList.add('stacked');
   // スタック時はプレーンテキストに戻す
@@ -626,6 +653,17 @@ function destroyCurrentBlock() {
   
   // 単語消去成功に伴い連続ミス（未消去着地）カウントをリセット
   gameState.consecutiveMisses = 0;
+
+  // ピンチ復帰中であれば、正解するごとに段階的にスピード復帰ステップを進める (1 -> 2 -> 3 -> 0[完全復帰])
+  if (gameState.pinchRecoveryStep > 0) {
+    if (gameState.pinchRecoveryStep === 1) {
+      gameState.pinchRecoveryStep = 2; // 1回成功: 50% -> 67%
+    } else if (gameState.pinchRecoveryStep === 2) {
+      gameState.pinchRecoveryStep = 3; // 2回成功: 67% -> 84%
+    } else if (gameState.pinchRecoveryStep === 3) {
+      gameState.pinchRecoveryStep = 0; // 3回成功: 84% -> 100% 完全復帰！
+    }
+  }
 
   // 正解英単語の英語ネイティブ音声発音読み上げ（チャイム効果音は消去）
   speakEnglishWord(block.text);
@@ -767,6 +805,8 @@ function startGame() {
   gameState.clearedCount = 0;
   gameState.comboCount = 0;
   gameState.consecutiveMisses = 0;
+  gameState.pinchRecoveryStep = 0;
+  gameState.currentSpeedMultiplier = 1.0;
   gameState.hasMistypedCurrentBlock = false;
   gameState.speedLevel = 1;
   gameState.fallSpeed = 0.85;
