@@ -98,6 +98,7 @@ let gameState = {
   highScore: 0,
   clearedCount: 0,
   comboCount: 0,
+  consecutiveMisses: 0, // 連続ミス（未消去着地）カウント
   hasMistypedCurrentBlock: false,
   speedLevel: 1,
   fallSpeed: 0.85, // ピクセル/フレーム (極めて緩やかに上昇)
@@ -421,12 +422,12 @@ function updateFooterPreview() {
   targetWordPreview.innerHTML = html;
 }
 
-// --- ピンチ時（デンジャー線接近）判定 & 自動スローダウン ---
+// --- ピンチ時（デンジャー線接近 / 3連続失敗）判定 & 自動スローダウン ---
 function checkPinchMode() {
   const dangerY = dangerLine.offsetTop + dangerLine.offsetHeight;
   let inPinch = false;
 
-  // 積み上がりブロックのいずれかが危険線から140px以内に接近したらピンチ
+  // 1. 積み上がりブロックのいずれかが危険線から140px以内に接近したらピンチ
   for (const stacked of gameState.stackedBlocks) {
     if (stacked.y <= dangerY + 140) {
       inPinch = true;
@@ -434,12 +435,21 @@ function checkPinchMode() {
     }
   }
 
+  // 2. 単語消去に失敗して3連続でブロックが着地・スタックした場合もピンチ発動！
+  if (gameState.consecutiveMisses >= 3) {
+    inPinch = true;
+  }
+
   gameState.isPinch = inPinch;
 
   if (inPinch) {
     dangerLine.classList.add('pinch-active');
     dangerBadge.classList.add('pinch-badge');
-    dangerBadge.textContent = '⚡ PINCH SLOW! ⚡';
+    if (gameState.consecutiveMisses >= 3) {
+      dangerBadge.textContent = '⚡ PINCH SLOW (3 MISS)! ⚡';
+    } else {
+      dangerBadge.textContent = '⚡ PINCH SLOW! ⚡';
+    }
   } else {
     dangerLine.classList.remove('pinch-active');
     dangerBadge.classList.remove('pinch-badge');
@@ -508,6 +518,9 @@ function gameLoop() {
 
 // --- ブロックのスタック（着地固定）化 ---
 function freezeBlockToStack(block) {
+  // タイピング失敗（未消去のまま着地）カウントをインクリメント
+  gameState.consecutiveMisses++;
+
   block.element.classList.add('stacked');
   // スタック時はプレーンテキストに戻す
   block.element.textContent = block.text;
@@ -611,6 +624,9 @@ function getJapaneseTranslation(word) {
 function destroyCurrentBlock() {
   const block = gameState.currentBlock;
   
+  // 単語消去成功に伴い連続ミス（未消去着地）カウントをリセット
+  gameState.consecutiveMisses = 0;
+
   // 正解英単語の英語ネイティブ音声発音読み上げ（チャイム効果音は消去）
   speakEnglishWord(block.text);
 
@@ -750,6 +766,7 @@ function startGame() {
   gameState.score = 0;
   gameState.clearedCount = 0;
   gameState.comboCount = 0;
+  gameState.consecutiveMisses = 0;
   gameState.hasMistypedCurrentBlock = false;
   gameState.speedLevel = 1;
   gameState.fallSpeed = 0.85;
