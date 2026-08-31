@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LexiDrop - 英単語タイピングゲーム</title>
   <meta name="description" content="ポップで明るい英単語ブロック落下タイピングゲーム。落ちてくる英単語をタイピングして消そう！">
+  <!-- Google Analytics (config.jsからGTM_ID読み込み時のみ埋め込み) -->
+  <script src="config.js"></script>
+  <script>
+    if (typeof GTM_ID !== 'undefined' && GTM_ID) {
+      const gaScript = document.createElement('script');
+      gaScript.async = true;
+      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GTM_ID)}`;
+      document.head.appendChild(gaScript);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', GTM_ID);
+    }
+  </script>
   <!-- Google Fonts: Fredoka & Quicksand -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

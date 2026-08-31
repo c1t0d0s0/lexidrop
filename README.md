@@ -59,6 +59,7 @@ lexidrop/
 ├── style.css    # ポップデザインシステム、グラデーション、カラー分け、アニメーション
 ├── script.js    # ゲームエンジン、衝突物理、Web Speech/Audio API、キーボード制御
 ├── words.json   # 3,300語以上の英単語＆日本語訳辞書データベース
+├── config.js    # 環境設定（Google Analytics / GTM ID 等）
 └── README.md    # プロジェクトドキュメント (本書)
 ```
 
