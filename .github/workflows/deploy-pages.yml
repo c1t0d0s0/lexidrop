@@ -24,6 +24,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate config.js
+        env:
+          GTM_ID: ${{ vars.GTM_ID || secrets.GTM_ID }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const gtmId = process.env.GTM_ID || '';
+            fs.writeFileSync('config.js', \`const GTM_ID = \${JSON.stringify(gtmId)};\n\`);
+          "
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
