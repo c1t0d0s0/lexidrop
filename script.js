@@ -82,7 +82,6 @@ async function loadWordsJSON() {
         if (data.medium) wordLibrary.medium = data.medium;
         if (data.long) wordLibrary.long = data.long;
         if (data.phrase) wordLibrary.phrase = data.phrase;
-        console.log('words.json 辞書の読み込みに成功しました。');
       }
     }
   } catch (err) {
