@@ -10,20 +10,36 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <!-- Google Analytics (config.jsからGTM_ID読み込み時のみ埋め込み) -->
+  <!-- Google Tag Manager / Google Analytics (config.jsからGTM_ID読み込み時のみ埋め込み)
+       - "GTM-" で始まる場合: Google Tag Manager のタグ
+       - それ以外 (例: "G-..."): Google Analytics (gtag.js) のタグ -->
   <script src="config.js"></script>
   <script>
-    if (typeof GTM_ID !== 'undefined' && GTM_ID) {
-      const gaScript = document.createElement('script');
-      gaScript.async = true;
-      gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GTM_ID)}`;
-      document.head.appendChild(gaScript);
+    (function () {
+      const tagId = (typeof GTM_ID !== 'undefined' && GTM_ID) ? String(GTM_ID).trim() : '';
+      if (!tagId) return;
 
       window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', GTM_ID);
-    }
+
+      if (/^GTM-/i.test(tagId)) {
+        // Google Tag Manager
+        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        const gtmScript = document.createElement('script');
+        gtmScript.async = true;
+        gtmScript.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(tagId)}`;
+        document.head.appendChild(gtmScript);
+      } else {
+        // Google Analytics (gtag.js)
+        const gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(tagId)}`;
+        document.head.appendChild(gaScript);
+
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', tagId);
+      }
+    })();
   </script>
   <!-- Google Fonts: Fredoka & Quicksand -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
